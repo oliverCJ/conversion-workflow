@@ -41,7 +41,7 @@ class Conversion {
                 return;
             }
             $len = strlen($query);
-            for ($i=0; $i < $len; $i++) { 
+            for ($i=0; $i < $len; $i++) {
                 if (!ctype_digit($query[$i]) || $query[$i] > 7) {
                     $this->result['error'] = '错误的8进制数据';
                     return;
@@ -55,7 +55,7 @@ class Conversion {
                 return;
             }
             $len = strlen($query);
-            for ($i=0; $i < $len; $i++) { 
+            for ($i=0; $i < $len; $i++) {
                 if (!ctype_digit($query[$i]) || $query[$i] > 1) {
                     $this->result['error'] = '错误的2进制数据';
                     return;
@@ -63,12 +63,9 @@ class Conversion {
             }
         } else {
             $baseCover = 10;
-            $len = strlen($query);
-            for ($i=0; $i < $len; $i++) { 
-                if (!ctype_digit($query[$i])) {
-                    $this->result['error'] = '错误的10进制数据';
-                    return;
-                }
+            if (!preg_match('#^-?\d+$#', $query)) {
+                $this->result['error'] = '错误的10进制数据';
+                return;
             }
         }
         $this->toBinary($query, $baseCover);
@@ -121,8 +118,13 @@ class Conversion {
         if ($from == 16) {
             return $this->result['current'] = $from;
         }
-        $re = base_convert($query, $from, 16);
-        $this->result['hex'] = $re;
+        if ($from == 10 && $query < 0) {
+            $re = dechex($query);
+            $this->result['hex'] = $re;
+        } else {
+            $re = base_convert($query, $from, 16);
+            $this->result['hex'] = $re;
+        }
     }
 
     /**
@@ -134,8 +136,13 @@ class Conversion {
         if ($from == 2) {
             return $this->result['current'] = $from;
         }
-        $re = base_convert($query, $from, 2);
-        $this->result['bin'] = $re;
+        if ($from == 10 && $query < 0) {
+            $re = decbin($query);
+            $this->result['bin'] = $re;
+        } else {
+            $re = base_convert($query, $from, 2);
+            $this->result['bin'] = $re;
+        }
     }
 
     /**
@@ -160,7 +167,12 @@ class Conversion {
         if ($from == 8) {
             return $this->result['current'] = $from;
         }
-        $re = base_convert($query, $from, 8);
-        $this->result['oct'] = $re;
+        if ($from == 10 && $query < 0) {
+            $re = decoct($query);
+            $this->result['oct'] = $re;
+        } else {
+            $re = base_convert($query, $from, 8);
+            $this->result['oct'] = $re;
+        }
     }
 }
